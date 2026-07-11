@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f4ede1" />
+  <title>AUREA — Objects that shouldn't exist</title>
+  <meta name="description" content="AUREA is a digital sculpture atelier casting light into impossible form." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23c99a3f'/%3E%3C/svg%3E" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+      "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm",
+      "gsap/ScrollTrigger": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm",
+      "lenis": "https://cdn.jsdelivr.net/npm/lenis@1.1.14/+esm"
+    }
+  }
+  </script>
+</head>
+<body>
+  <!-- ===== Preloader ===== -->
+  <div class="preloader" id="preloader">
+    <div class="preloader__inner">
+      <div class="preloader__mark">AUREA</div>
+      <div class="preloader__bar"><span id="preloader-fill"></span></div>
+      <div class="preloader__count"><span id="preloader-count">0</span><em>%</em></div>
+    </div>
+  </div>
+
+  <!-- ===== Grain overlay ===== -->
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- ===== WebGL stage (fixed, behind everything) ===== -->
+  <canvas id="stage"></canvas>
+
+  <!-- ===== Cursor ===== -->
+  <div class="cursor" id="cursor"><span></span></div>
+
+  <!-- ===== Navigation ===== -->
+  <header class="nav" id="nav">
+    <a class="nav__brand" href="#top" data-hover>AUREA<sup>®</sup></a>
+    <nav class="nav__links">
+      <a href="#metal" data-hover>Metal</a>
+      <a href="#method" data-hover>Method</a>
+      <a href="#works" data-hover>Works</a>
+      <a href="#contact" data-hover>Contact</a>
+    </nav>
+    <a href="#contact" class="nav__cta" data-hover><span>Commission</span></a>
+  </header>
+
+  <main id="top">
+
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="hero">
+      <div class="hero__eyebrow reveal-up">
+        <span>Digital Sculpture Atelier</span>
+        <span>Est. MMXXVI</span>
+      </div>
+      <h1 class="hero__title">
+        <span class="line"><span class="word">AUREA</span></span>
+      </h1>
+      <div class="hero__foot">
+        <p class="hero__tag reveal-up">Objects that <em>shouldn't</em> exist —<br/>cast from light, poured in gold.</p>
+        <div class="hero__scroll reveal-up">
+          <span>Scroll to descend</span>
+          <div class="hero__scroll-line"><i></i></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== INTRO STATEMENT ===== -->
+    <section class="statement" id="statement">
+      <p class="statement__text">
+        <span class="w">We</span> <span class="w">forge</span> <span class="w">the</span> <span class="w">impossible</span>
+        <span class="w">into</span> <span class="w">the</span> <span class="w">inevitable.</span>
+        <span class="w dim">Every</span> <span class="w dim">form</span> <span class="w dim">begins</span>
+        <span class="w dim">as</span> <span class="w dim">a</span> <span class="w dim">flaw</span>
+        <span class="w dim">in</span> <span class="w dim">the</span> <span class="w dim">light.</span>
+      </p>
+    </section>
+
+    <!-- ===== THE METAL ===== -->
+    <section class="chapter chapter--metal" id="metal">
+      <div class="chapter__index">01</div>
+      <div class="chapter__head">
+        <h2 class="chapter__title"><span class="reveal-line">The</span><span class="reveal-line"><em>Metal</em></span></h2>
+      </div>
+      <div class="chapter__body">
+        <p class="reveal-up">Gold does not rust, does not fade, does not apologise. It is the only metal warm enough to hold light and heavy enough to keep it. We work it in the digital forge — melting, folding, and freezing it mid-motion.</p>
+        <div class="stat-row">
+          <div class="stat reveal-up"><b data-count="1064">0</b><span>°C melting point, honoured</span></div>
+          <div class="stat reveal-up"><b data-count="24">0</b><span>karat, uncompromised</span></div>
+          <div class="stat reveal-up"><b data-count="197">0</b><span>atomic weight, exact</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== THE METHOD ===== -->
+    <section class="chapter chapter--method" id="method">
+      <div class="chapter__index">02</div>
+      <div class="method__head">
+        <h2 class="chapter__title"><span class="reveal-line">The</span><span class="reveal-line"><em>Method</em></span></h2>
+        <p class="reveal-up">Three movements. One form. No second casting.</p>
+      </div>
+      <ol class="method__list">
+        <li class="method__item">
+          <span class="method__num">01</span>
+          <h3>Melt</h3>
+          <p>We dissolve intention into raw flux — a field of noise where no edge is yet decided.</p>
+        </li>
+        <li class="method__item">
+          <span class="method__num">02</span>
+          <h3>Fold</h3>
+          <p>Light is drawn through the flux until surface tension finds a shape it cannot refuse.</p>
+        </li>
+        <li class="method__item">
+          <span class="method__num">03</span>
+          <h3>Freeze</h3>
+          <p>At the exact instant of grace, the motion is arrested. What remains is permanent.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ===== THE WORKS (horizontal) ===== -->
+    <section class="works" id="works">
+      <div class="works__pin">
+        <div class="works__track" id="works-track">
+          <div class="works__intro panel">
+            <div class="chapter__index">03</div>
+            <h2 class="chapter__title"><span>The</span><span><em>Works</em></span></h2>
+            <p>A selection from the permanent collection.<br/>Drag, or keep scrolling.</p>
+          </div>
+          <article class="work" data-work>
+            <div class="work__media"><img data-img="splash" alt="Aurea sculpture — Rupture" /></div>
+            <div class="work__meta"><span class="work__no">001</span><h3>Rupture</h3><span class="work__yr">Molten gold, arrested</span></div>
+          </article>
+          <article class="work" data-work>
+            <div class="work__media"><img data-img="monolith" alt="Aurea sculpture — Oath" /></div>
+            <div class="work__meta"><span class="work__no">002</span><h3>Oath</h3><span class="work__yr">Standing fold</span></div>
+          </article>
+          <article class="work" data-work>
+            <div class="work__media"><img data-img="drape" alt="Aurea sculpture — Veil" /></div>
+            <div class="work__meta"><span class="work__no">003</span><h3>Veil</h3><span class="work__yr">Liquid chrome drapery</span></div>
+          </article>
+          <article class="work" data-work>
+            <div class="work__media"><img data-img="sphere" alt="Aurea sculpture — Sun, Held" /></div>
+            <div class="work__meta"><span class="work__no">004</span><h3>Sun, Held</h3><span class="work__yr">Rippling sphere</span></div>
+          </article>
+          <div class="works__end panel">
+            <p>Every piece is one of one.</p>
+            <a href="#contact" class="btn-ghost" data-hover><span>Commission yours</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== MANIFESTO ===== -->
+    <section class="manifesto" id="manifesto">
+      <blockquote class="manifesto__quote">
+        <span class="mword">“A</span> <span class="mword">sculpture</span> <span class="mword">is</span>
+        <span class="mword">light</span> <span class="mword">that</span> <span class="mword">forgot</span>
+        <span class="mword">how</span> <span class="mword">to</span> <span class="mword">leave.”</span>
+      </blockquote>
+      <cite class="manifesto__cite reveal-up">— The Aurea Doctrine</cite>
+    </section>
+
+    <!-- ===== CONTACT ===== -->
+    <section class="contact" id="contact">
+      <div class="contact__inner">
+        <p class="contact__kicker reveal-up">Commissions open for MMXXVI</p>
+        <a href="mailto:atelier@aurea.studio" class="contact__mail" data-hover>
+          <span class="reveal-line">atelier@</span><span class="reveal-line"><em>aurea.studio</em></span>
+        </a>
+        <div class="contact__cols">
+          <div class="reveal-up"><span>Index</span><a href="#top">Top</a><a href="#works">Works</a><a href="#method">Method</a></div>
+          <div class="reveal-up"><span>Elsewhere</span><a href="#" data-hover>Instagram</a><a href="#" data-hover>Behance</a><a href="#" data-hover>Are.na</a></div>
+          <div class="reveal-up"><span>Atelier</span><a href="#">45.4642° N</a><a href="#">9.1900° E</a><a href="#">Milano</a></div>
+        </div>
+      </div>
+      <div class="contact__wordmark" aria-hidden="true">AUREA</div>
+      <div class="contact__legal">
+        <span>© MMXXVI Aurea Studio — Fiction, crafted.</span>
+        <span>Built with Three.js · GSAP · Lenis</span>
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module" src="main.js?v=1"></script>
+</body>
+</html>
