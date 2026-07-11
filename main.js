@@ -235,25 +235,39 @@ new THREE.TextureLoader().load(
 
 /* ------------------------------------------------------------
    4 · SCROLL CHOREOGRAPHY of the form
+   Each section sets a TARGET pose; the render loop eases toward it.
+   A lerp can never snap, so section boundaries are always continuous.
 ------------------------------------------------------------ */
-const pose = { x: 0, y: 0, scale: 1, rotX: 0, rotY: 0, morph: 0.4, opacity: 1, amp: 0.28 };
+const pose   = { x: 0, y: 0, scale: 1, rotX: 0, rotY: 0, morph: 0.4, opacity: 1, amp: 0.28 };
+const target = { x: 0, y: 0, scale: 1, rotX: 0, rotY: 0, morph: 0.4, opacity: 1, amp: 0.28 };
+const POSE_KEYS = ["x", "y", "scale", "rotY", "morph", "opacity", "amp"];
 
-function setPose(trigger, start, end, to) {
-  gsap.to(pose, {
-    ...to,
-    ease: "none",
-    scrollTrigger: { trigger, start, end, scrub: reduceMotion ? false : 1 },
-  });
-}
-if (!reduceMotion) {
-  setPose("#statement", "top bottom", "bottom center", { x: 1.5, y: 0.15, scale: 0.82, morph: 0.7, rotY: 1.1, amp: 0.34 });
-  setPose("#metal", "top bottom", "bottom top", { x: 1.7, y: -0.1, scale: 0.92, rotY: 2.0, morph: 0.55, amp: 0.3 });
-  setPose("#method", "top bottom", "bottom top", { x: -1.75, y: 0.1, scale: 0.72, rotY: 3.0, morph: 0.85, opacity: 0.85, amp: 0.4 });
-  // hide behind the dark WORKS section
-  gsap.to(pose, { opacity: 0, ease: "none", scrollTrigger: { trigger: "#works", start: "top 80%", end: "top 30%", scrub: 1 } });
-  gsap.to(pose, { opacity: 1, ease: "none", scrollTrigger: { trigger: "#manifesto", start: "top 80%", end: "top 40%", scrub: 1 } });
-  setPose("#manifesto", "top bottom", "center center", { x: 0, y: 0, scale: 1.18, rotY: 4.2, morph: 0.45, amp: 0.26 });
-  setPose("#contact", "top bottom", "bottom bottom", { x: 0, y: -1.6, scale: 0.9, rotY: 5.0, morph: 0.6, opacity: 0.45, amp: 0.3 });
+const POSES = {
+  hero:      { x: 0,     y: 0,     scale: 1,    rotY: 0,   morph: 0.40, amp: 0.28, opacity: 1    },
+  statement: { x: 1.35,  y: 0.12,  scale: 0.82, rotY: 0.8, morph: 0.68, amp: 0.34, opacity: 1    },
+  metal:     { x: 1.6,   y: -0.1,  scale: 0.94, rotY: 1.6, morph: 0.55, amp: 0.30, opacity: 1    },
+  method:    { x: -1.6,  y: 0.12,  scale: 0.72, rotY: 2.6, morph: 0.85, amp: 0.40, opacity: 0.92 },
+  works:     { x: -1.2,  y: 0.0,   scale: 0.70, rotY: 3.2, morph: 0.85, amp: 0.40, opacity: 0    },
+  manifesto: { x: 0,     y: 0,     scale: 1.18, rotY: 4.2, morph: 0.45, amp: 0.26, opacity: 1    },
+  contact:   { x: 0,     y: -1.5,  scale: 0.9,  rotY: 5.0, morph: 0.60, amp: 0.30, opacity: 0.5  },
+};
+
+// Map each section to its pose. Target = the section that owns the viewport
+// centre RIGHT NOW (live rects) — this is immune to the pinned Works section,
+// which position:fixed pinning would otherwise desync from ScrollTrigger math.
+const SECTION_ELS = reduceMotion ? [] : [
+  ["hero", POSES.hero], ["statement", POSES.statement], ["metal", POSES.metal],
+  ["method", POSES.method], ["works", POSES.works], ["manifesto", POSES.manifesto],
+  ["contact", POSES.contact],
+].map(([id, p]) => [document.getElementById(id), p]).filter(([el]) => el);
+
+function updateTarget() {
+  const mid = window.innerHeight * 0.5;
+  for (let i = 0; i < SECTION_ELS.length; i++) {
+    const el = SECTION_ELS[i][0];
+    const r = el.getBoundingClientRect();
+    if (r.top <= mid && r.bottom >= mid) { Object.assign(target, SECTION_ELS[i][1]); return; }
+  }
 }
 
 /* ------------------------------------------------------------
@@ -275,6 +289,14 @@ function render() {
   // ease pointer
   mouse.x += (mouse.tx - mouse.x) * 0.05;
   mouse.y += (mouse.ty - mouse.y) * 0.05;
+
+  // pick the section that owns the viewport centre, then ease toward its pose
+  // (a lerp can never snap → section boundaries are always continuous)
+  updateTarget();
+  for (let i = 0; i < POSE_KEYS.length; i++) {
+    const k = POSE_KEYS[i];
+    pose[k] += (target[k] - pose[k]) * 0.06;
+  }
 
   // breathing morph + scroll morph
   uniforms.uMorph.value = pose.morph + Math.sin(t * 0.6) * 0.08;
