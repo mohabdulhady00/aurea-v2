@@ -9,6 +9,10 @@ import Lenis from "lenis";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// don't let the browser restore a mid-page scroll on reload (would snap the form)
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+ScrollTrigger.config({ ignoreMobileResize: true });
+
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const isMobile = window.matchMedia("(max-width: 820px)").matches;
 const isTouch = window.matchMedia("(hover: none)").matches;
@@ -319,11 +323,15 @@ function finishPreloader() {
     onUpdate: () => { preFill.style.width = progress.v + "%"; preCount.textContent = Math.round(progress.v); },
     onComplete: () => {
       startScene();
+      // recalc all triggers ONCE, while the preloader still covers the view and
+      // we're pinned at the top — so the pin spacer can't nudge scroll mid-intro
+      window.scrollTo(0, 0);
+      if (lenis) lenis.scrollTo(0, { immediate: true });
+      ScrollTrigger.refresh();
       const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
       tl.to(pre, { yPercent: -100, duration: 1.1, ease: "expo.inOut" })
         .from(".hero__title .word", { yPercent: 110, duration: 1.2, stagger: 0.08 }, "-=0.6")
-        .from(".hero__eyebrow, .hero__tag, .hero__scroll", { y: 24, opacity: 0, duration: 1, stagger: 0.12 }, "-=0.8")
-        .add(() => ScrollTrigger.refresh());
+        .from(".hero__eyebrow, .hero__tag, .hero__scroll", { y: 24, opacity: 0, duration: 1, stagger: 0.12 }, "-=0.8");
     },
   });
 }
@@ -336,7 +344,7 @@ function initReveals() {
   gsap.utils.toArray(".reveal-up").forEach((el) => {
     gsap.from(el, {
       y: 40, opacity: 0, duration: 1, ease: "power3.out",
-      scrollTrigger: { trigger: el, start: "top 88%" },
+      scrollTrigger: { trigger: el, start: "top 88%", once: true },
     });
   });
 
@@ -349,7 +357,7 @@ function initReveals() {
     el.appendChild(inner);
     gsap.from(inner, {
       yPercent: 120, duration: 1.15, ease: "expo.out",
-      scrollTrigger: { trigger: el, start: "top 92%" },
+      scrollTrigger: { trigger: el, start: "top 92%", once: true },
     });
   });
 
@@ -362,7 +370,7 @@ function initReveals() {
   // manifesto words rise
   gsap.from("#manifesto .mword", {
     yPercent: 120, opacity: 0, duration: 1, stagger: 0.06, ease: "expo.out",
-    scrollTrigger: { trigger: "#manifesto", start: "top 65%" },
+    scrollTrigger: { trigger: "#manifesto", start: "top 65%", once: true },
   });
 
   // counters
@@ -371,7 +379,7 @@ function initReveals() {
     const obj = { v: 0 };
     gsap.to(obj, {
       v: target, duration: 2, ease: "power2.out",
-      scrollTrigger: { trigger: el, start: "top 90%" },
+      scrollTrigger: { trigger: el, start: "top 90%", once: true },
       onUpdate: () => { el.textContent = Math.round(obj.v); },
     });
   });
@@ -447,6 +455,8 @@ initReveals();
 initWorks();
 initCursor();
 ScrollTrigger.refresh();
+// re-measure once webfonts settle (layout can shift); harmless now that reveals are `once`
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => ScrollTrigger.refresh());
 
 // safety: if env image is very slow, don't trap the user
 setTimeout(() => { if (!started) { proceduralEnv(); finishPreloader(); } }, 6000);
