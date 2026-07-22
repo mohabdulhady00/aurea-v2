@@ -56,7 +56,13 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setClearColor(0x000000, 0);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.6 : 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
+// updateStyle=false: #stage's CSS (width:100vw; height:100dvh) stays the single
+// source of truth for the canvas's box size. Without this, Three.js writes an
+// inline style="width:...px;height:...px" that overrides the stylesheet — on
+// mobile that pins the canvas to whatever size it was on the last resize event,
+// which drifts from the live dvh box as the browser's toolbar animates during
+// scroll, stretching the render non-uniformly (the gold form reads as squashed).
+renderer.setSize(window.innerWidth, window.innerHeight, false);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -449,13 +455,30 @@ function initCursor() {
 
 /* ------------------------------------------------------------
    10 · RESIZE
+   Synced off the canvas's own rendered box (ResizeObserver) rather than
+   window "resize": on mobile, the browser toolbar showing/hiding during
+   scroll changes the canvas's actual CSS size (100dvh) without reliably
+   firing a window resize event, which is what let the drawing buffer and
+   the on-screen box drift apart in the first place.
 ------------------------------------------------------------ */
-window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
+function syncRendererSize(width, height) {
+  if (width <= 0 || height <= 0) return;
+  camera.aspect = width / height;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(width, height, false);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.6 : 2));
-});
+}
+
+if ("ResizeObserver" in window) {
+  new ResizeObserver(([entry]) => {
+    const { width, height } = entry.contentRect;
+    syncRendererSize(width, height);
+  }).observe(canvas);
+} else {
+  window.addEventListener("resize", () => {
+    syncRendererSize(window.innerWidth, window.innerHeight);
+  });
+}
 
 /* ------------------------------------------------------------
    11 · WIRE GALLERY IMAGES (lazy)
