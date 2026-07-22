@@ -50,12 +50,16 @@ if (!reduceMotion) {
 const canvas = document.getElementById("stage");
 const renderer = new THREE.WebGLRenderer({
   canvas,
-  antialias: true,
+  // MSAA is one of the more expensive things a mobile GPU does for this
+  // scene — multisampling the custom vertex-displaced clearcoat/iridescent
+  // material adds real per-frame cost for a benefit that's much less
+  // visible on small, high-density phone screens than on desktop.
+  antialias: !isMobile,
   alpha: true,
   powerPreference: "high-performance",
 });
 renderer.setClearColor(0x000000, 0);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.6 : 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
 // updateStyle=false: #stage's CSS (width:100vw; height:100dvh) stays the single
 // source of truth for the canvas's box size. Without this, Three.js writes an
 // inline style="width:...px;height:...px" that overrides the stylesheet — on
@@ -160,7 +164,13 @@ goldMat.onBeforeCompile = (shader) => {
     .replace("#include <begin_vertex>", `vec3 transformed = dp;`);
 };
 
-const detail = reduceMotion ? 12 : isMobile ? 24 : 48;
+// Vertex count grows roughly with detail^2, and the vertex shader runs the
+// noise-distortion function 3x per vertex per frame (once for position,
+// twice more for the finite-difference normal recalculation) — this is the
+// single biggest lever on sustained mobile GPU/vertex load. 16 keeps the
+// form reading smooth on a small, high-density phone screen at meaningfully
+// lower cost than 24.
+const detail = reduceMotion ? 12 : isMobile ? 16 : 48;
 const geo = new THREE.IcosahedronGeometry(1.55, detail);
 const blob = new THREE.Mesh(geo, goldMat);
 scene.add(blob);
@@ -466,7 +476,7 @@ function syncRendererSize(width, height) {
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height, false);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.6 : 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
 }
 
 if ("ResizeObserver" in window) {
