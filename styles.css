@@ -50,6 +50,15 @@ img { max-width: 100%; display: block; }
   inset: 0;
   width: 100vw;
   height: 100dvh;
+  /* On a phone, 100dvh shrinks and grows continuously while the browser toolbar
+     animates during scroll. The canvas ResizeObserver syncs the WebGL drawing
+     buffer to this box, so a dvh box means reallocating that buffer on scroll
+     frames — a GPU stall right when the gold form is moving. 100lvh (largest
+     viewport height) is constant regardless of toolbar state, so the box and the
+     buffer both stay put; the extra strip simply sits behind the toolbar, which
+     is invisible for a fixed background element. Declared second so browsers
+     without lvh keep the dvh value. */
+  height: 100lvh;
   z-index: 1;
   pointer-events: none;
   opacity: 0;
@@ -303,6 +312,14 @@ section { position: relative; }
 }
 .contact__legal { position: relative; z-index: 2; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; border-top: 1px solid var(--line); margin-top: clamp(4rem,10vw,8rem); padding-top: 1.5rem; font-size: .74rem; letter-spacing: .04em; opacity: .55; }
 @media (max-width: 640px){ .contact__cols{ grid-template-columns:1fr; } }
+
+/* The footer links are ~23px of text with a fit-content box, which is well under
+   the 44px minimum touch target. Pad the hit area on touch input only — the text
+   itself does not move, so the layout reads identically. */
+@media (hover: none) {
+  .contact__cols > div { gap: 0; }
+  .contact__cols a { min-height: 44px; min-width: 44px; display: flex; align-items: center; }
+}
 
 /* ---------- Motion-safe fallback ---------- */
 @media (prefers-reduced-motion: reduce) {
